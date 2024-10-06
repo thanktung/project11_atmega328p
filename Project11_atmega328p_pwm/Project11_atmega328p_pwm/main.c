@@ -41,7 +41,8 @@ int main()
 		itoa(pwm, pwm_str, 10);    // Convert PWM to string
 		speed = 50; // Function to get motor speed (assumed)
 		itoa(speed, speed_str, 10); // Convert speed to string
-
+	
+		LCD_Clear();
 		// Display PWM on LCD (first line)
 		LCD_String_xy(0, 0, "PWM: ");
 		LCD_String_xy(0, 5, pwm_str);  // Display PWM value at position 5
