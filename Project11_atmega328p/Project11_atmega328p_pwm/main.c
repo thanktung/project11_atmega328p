@@ -14,12 +14,11 @@ int check_button();
 
 int button_value = 0;
 int pwm = 250;
-int speed = 0;          // Assuming you will calculate or get the motor speed
+int speed = 0;          // Change speed to int
 char pwm_str[10];
-char speed_str[10];
-	
-volatile int count_last = 0;
+char speed_str[10];     // Buffer size remains the same for int
 
+int count_last = 0;
 int overflow_count = 0;
 
 int main()
@@ -34,21 +33,30 @@ int main()
 		button_value = check_button();
 		pwm += 10 * button_value;  // Adjust PWM based on button input
 		
-		// Limit PWM within the range of 0 to 255
+		// Limit PWM within the range of -255 to 255
 		if (pwm > 255) {
 			pwm = 255;
-			} else if (pwm < 0) {
-			pwm = 0;
+			} else if (pwm < -255) {
+			pwm = -255;
 		}
 		
 		set_motor(pwm);  // Set the new motor speed
 
 		itoa(pwm, pwm_str, 10);    // Convert PWM to string
-		//speed = count; // Function to get motor speed (assumed)
-		itoa(speed, speed_str, 10); // Convert speed to string
-	
+		itoa(speed, speed_str, 10);  // Convert speed to string
+		// Update LCD display
+		LCD_Clear();
 		
+		// Display PWM on LCD (first line)
+		LCD_String_xy(0, 0, "PWM: ");
+		LCD_String_xy(0, 5, pwm_str);  // Display PWM value at position 5
 
+		// Display Speed on LCD (second line)
+		LCD_String_xy(1, 0, "SPEED: ");
+		LCD_String_xy(1, 7, speed_str);  // Display speed value at position 7
+		
+		_delay_ms(100);
+		
 	}
 	
 	return 0;
@@ -56,7 +64,7 @@ int main()
 
 void button_init(){
 	DDRB &= (~(1<<DDB1)) & (~(1<<DDB0));  // Set PB1 and PB0 as input
-	PORTB |= (1<<PORTB1) | (1<<PORTB0);         // Enable pull-up resistors
+	PORTB |= (1<<PORTB1) | (1<<PORTB0);   // Enable pull-up resistors
 }
 
 int check_button(){
@@ -77,17 +85,9 @@ int check_button(){
 
 ISR(TIMER0_OVF_vect){
 	overflow_count++;
-	if (overflow_count > 500){ //period = 64*256/500*1000 = 0.512s
-		speed = (count - count_last)/0.512/202*60; //RPM
-		
-		LCD_Clear();
-		// Display PWM on LCD (first line)
-		LCD_String_xy(0, 0, "PWM: ");
-		LCD_String_xy(0, 5, pwm_str);  // Display PWM value at position 5
-
-		// Display Speed on LCD (second line)
-		LCD_String_xy(1, 0, "SPEED: ");
-		LCD_String_xy(1, 7, speed_str);  // Display speed value at position 7
+	if (overflow_count > 100){ //period = 64*256/16e6*100 = 0.1024s
+		// Calculate RPM and cast the float to an integer
+		speed = (int)(((float)(count - count_last) / 0.1024) / 202.0 * 60.0);  // Convert to int
 		
 		overflow_count = 0;
 		count_last = count;

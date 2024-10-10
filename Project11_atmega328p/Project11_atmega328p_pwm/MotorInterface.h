@@ -33,16 +33,16 @@ static inline void motor_set_pwm(uint8_t value)
 
 static inline void set_motor(int x)
 {
-	if (x > 0)
+	if (x > 0 )
 	{
-		PORTD |= (1<<PORTD4);  // IN1 = 1
-		PORTD &= ~(1<<PORTD5); // IN2 = 0
+		PORTD |= (1<<PORTD5);  // IN2 = 1
+		PORTD &= ~(1<<PORTD4); // IN1 = 0
 		motor_set_pwm(x);      // Set PWM to positive value
 	}
 	else if (x < 0)
 	{
-		PORTD &= ~(1<<PORTD4); // IN1 = 0
-		PORTD |= (1<<PORTD5);  // IN2 = 1
+		PORTD &= ~(1<<PORTD5); // IN2 = 0
+		PORTD |= (1<<PORTD4);  // IN1 = 1
 		motor_set_pwm(-x);     // Set PWM to positive value (absolute of x)
 	}
 	else
